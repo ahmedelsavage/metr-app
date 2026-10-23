@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.venv/
+qdrant_storage/
+
 # C extensions
 *.so
 
