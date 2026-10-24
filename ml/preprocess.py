@@ -98,7 +98,7 @@ def save(frames, targets, label_names):
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     for name, df in frames.items():
         build_output(df, targets[name], label_names).to_csv(
-            PROCESSED_DIR / f"{name}_clean.csv", index=False
+            PROCESSED_DIR / f"{name}.csv", index=False
         )
 
 
