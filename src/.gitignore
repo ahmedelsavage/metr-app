@@ -5,7 +5,7 @@ __pycache__/
 
 .venv/
 qdrant_storage/
-
+data
 # C extensions
 *.so
 
@@ -154,6 +154,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+benchmark_results/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
