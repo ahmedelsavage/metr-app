@@ -5,7 +5,7 @@ __pycache__/
 
 .venv/
 qdrant_storage/
-
+data
 # C extensions
 *.so
 
