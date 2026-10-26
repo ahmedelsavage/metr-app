@@ -1,11 +1,11 @@
 from typing import List, Literal, Optional
+
 from pydantic import BaseModel, model_validator
 
 
-# OCR Output
 class OCRResult(BaseModel):
     text: str
-    confidence: float = 1.0
+    confidence: float = 0.0
     language: str = "ar"
 
 

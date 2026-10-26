@@ -1,0 +1,154 @@
+[
+    {
+        "id": "V4_EN01",
+        "language": "en",
+        "contract_text": "The company rents a car to the customer for 5 days at 500 per day. The rental price stays fixed during the rental period, and any change to the price needs the customer's written approval. The company's liability for loss of the customer's personal belongings in the car is limited to 10,000. The customer returns the car with the same fuel level.",
+        "legal_context": "Demo context: A clear liability cap and prices that need approval are generally balanced. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_EN02",
+        "language": "en",
+        "contract_text": "The app offers a monthly subscription for its learning content. The company may change the subscription price at any time, and the new price applies immediately to all current subscribers. Subscribers cannot cancel during the first year, even if the price changes.",
+        "legal_context": "Demo context: Price changes should be announced in advance and the customer should be able to refuse or leave. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "unilateral_change",
+                "severity": "high",
+                "evidence": "may change the subscription price at any time, new price applies immediately, cannot cancel"
+            }
+        ]
+    },
+    {
+        "id": "V4_EN03",
+        "language": "en",
+        "contract_text": "The provider offers cloud storage to the customer for 12 months. The provider may suspend an account only after sending 14 days written notice that states the reason, and the customer may respond or fix the problem during that period. After the contract ends, the provider keeps the customer's files for 30 days so the customer can download them.",
+        "legal_context": "Demo context: Account suspension with notice, a stated reason, and a chance to respond is generally acceptable. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_EN04",
+        "language": "en",
+        "contract_text": "The wedding hall is booked for one evening at a price of 30,000. The client is responsible for every damage and loss of any kind that happens in the hall, and no maximum amount applies. Any dispute will be sent to a single arbitrator chosen only by the hall owner.",
+        "legal_context": "Demo context: Unlimited responsibility and one-sided choice of the arbitrator should be reviewed carefully. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "unlimited_liability",
+                "severity": "high",
+                "evidence": "responsible for every damage and loss of any kind, and no maximum amount applies"
+            },
+            {
+                "label": "unfair_arbitration",
+                "severity": "high",
+                "evidence": "single arbitrator chosen only by the hall owner"
+            }
+        ]
+    },
+    {
+        "id": "V4_EN05",
+        "language": "en",
+        "contract_text": "The translator will translate a 40-page document and the client pays half in advance and half on delivery. If the translator delivers late, a penalty of 5 percent of the price applies for each week of delay, up to a maximum of 20 percent. Either party may end the contract with 14 days written notice. Both parties keep the document content confidential.",
+        "legal_context": "Demo context: Capped, clear penalties and equal notice rights are generally balanced. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_EN06",
+        "language": "en",
+        "contract_text": "The compnay hires the empolyee for a fixd salry. The compnay may deduct any amnt from the empolyee salry without explaning the reasn. The compnay may also fire the empolyee at any tme without notce, but the empolyee must give 3 mnths notce before leaving.",
+        "legal_context": "Demo context: Salary deductions should be justified and explained, and notice rights should be balanced. This is illustrative context, not a real legal citation.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "unfair_deduction",
+                "severity": "high",
+                "evidence": "may deduct any amnt from the empolyee salry without explaning the reasn"
+            },
+            {
+                "label": "unilateral_termination",
+                "severity": "high",
+                "evidence": "fire the empolyee at any tme without notce, employee must give 3 mnths notce"
+            }
+        ]
+    },
+    {
+        "id": "V4_AR01",
+        "language": "ar",
+        "contract_text": "يقدم المركز دروساً خصوصية لطالب مقابل 2000 جنيه شهرياً. وتبقى الرسوم ثابتة طوال العام الدراسي، ولا يجوز تغييرها إلا بموافقة ولي الأمر كتابياً. وتكون مسؤولية المركز عن أي ضرر محدودة بحد أقصى قدره 5000 جنيه. ويلتزم الطالب بالحضور في المواعيد المحددة.",
+        "legal_context": "سياق تجريبي: تثبيت الرسوم واشتراط الموافقة على تغييرها وتحديد المسؤولية بسقف واضح أمور متوازنة عادة. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_AR02",
+        "language": "ar",
+        "contract_text": "يقدم التطبيق اشتراكاً شهرياً في خدمة الموسيقى. ويجوز للشركة تعديل سعر الاشتراك وشروط الاستخدام في أي وقت، وتسري التعديلات فوراً على جميع المشتركين دون إخطار. ولا يحق للمشترك الاعتراض على هذه التعديلات.",
+        "legal_context": "سياق تجريبي: يجب أن تكون تعديلات الأسعار والشروط معلنة مسبقاً ويحق للمشترك رفضها. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "unilateral_change",
+                "severity": "high",
+                "evidence": "تعديل سعر الاشتراك وشروط الاستخدام في أي وقت، دون إخطار، ولا يحق للمشترك الاعتراض"
+            }
+        ]
+    },
+    {
+        "id": "V4_AR03",
+        "language": "ar",
+        "contract_text": "تتيح المنصة للبائع عرض منتجاته اليدوية مقابل عمولة 10 بالمائة. ويجوز للمنصة إزالة أي منتج مخالف للشروط بعد إخطار البائع كتابياً بسبب الإزالة، ويحق للبائع الاعتراض خلال 7 أيام وتقديم ما يثبت التزامه. ويلتزم البائع بشحن الطلبات خلال 3 أيام.",
+        "legal_context": "سياق تجريبي: الإزالة بعد إخطار مع ذكر السبب وإتاحة فرصة للاعتراض مقبولة عادة. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_AR04",
+        "language": "ar",
+        "contract_text": "يتولى المقاول تشطيب شقة المالك مقابل 200,000 جنيه تدفع على ثلاث دفعات. ويحق للمقاول خصم أي مبلغ من الدفعة الأخيرة دون توضيح السبب للمالك. ويتحمل المالك جميع الخسائر والأضرار التي تقع في موقع العمل أياً كان سببها، دون أي حد أقصى للمبلغ.",
+        "legal_context": "سياق تجريبي: يجب أن تكون الخصومات مبررة ومشروحة، ويجب مراجعة تحميل طرف واحد كل الخسائر دون سقف. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "unfair_deduction",
+                "severity": "high",
+                "evidence": "خصم أي مبلغ من الدفعة الأخيرة دون توضيح السبب"
+            },
+            {
+                "label": "unlimited_liability",
+                "severity": "high",
+                "evidence": "يتحمل المالك جميع الخسائر والأضرار أياً كان سببها، دون أي حد أقصى"
+            }
+        ]
+    },
+    {
+        "id": "V4_AR05",
+        "language": "ar",
+        "contract_text": "تتولى الشركة نقل أثاث العميل إلى شقته الجديدة مقابل 6000 جنيه. وإذا تأخرت الشركة عن الموعد تطبق غرامة 5 بالمائة من الأجر عن كل أسبوع تأخير بحد أقصى 20 بالمائة. ويجوز لأي من الطرفين إنهاء العقد بإخطار كتابي قبل 14 يوماً. ويلتزم الطرفان بسرية بيانات العميل.",
+        "legal_context": "سياق تجريبي: الغرامات الواضحة ذات الحد الأقصى وحقوق الإنهاء المتساوية متوازنة عادة. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": []
+    },
+    {
+        "id": "V4_AR06",
+        "language": "ar",
+        "contract_text": "تقدم الشركه خدمه الصيانه للعميل مقابل ٥٠٠ جنيه شهريا. ولا تتحمل الشركه اي مسؤوليه عن اي ضرر مهما كان سببه. وكل نزاع يحال الى محكم تختاره الشركه وحدها ويتنازل العميل عن حقه في اللجوء الى المحاكم.",
+        "legal_context": "سياق تجريبي: يجب مراجعة الإعفاء الكامل من المسؤولية والتحكيم الذي يختاره طرف واحد. هذا سياق توضيحي وليس مرجعًا قانونيًا حقيقيًا.",
+        "bert_mock": [],
+        "expected_risks": [
+            {
+                "label": "liability_exclusion",
+                "severity": "high",
+                "evidence": "لا تتحمل الشركه اي مسؤوليه عن اي ضرر مهما كان سببه"
+            },
+            {
+                "label": "unfair_arbitration",
+                "severity": "high",
+                "evidence": "محكم تختاره الشركه وحدها ويتنازل العميل عن حقه في اللجوء الى المحاكم"
+            }
+        ]
+    }
+]

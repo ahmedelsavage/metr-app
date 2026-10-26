@@ -188,7 +188,7 @@ def _post_with_connection_retry(url: str, headers: dict, payload: dict):
         f"attempts. Last error: {last_error}"
     )
 
-
+#response from the server
 def _extract_text(data) -> str:
     """Find the generated text in the server response."""
 

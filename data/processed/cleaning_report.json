@@ -1,0 +1,59 @@
+{
+  "train_rows_before": 5532,
+  "dups_inside": {
+    "train": 105,
+    "val": 14,
+    "test": 7
+  },
+  "train_val_overlap": 22,
+  "train_test_overlap": 36,
+  "val_test_overlap": 9,
+  "conflicting_texts": 1,
+  "empty_text_removed": 0,
+  "exact_duplicates_removed": 104,
+  "leakage_rows_removed": 48,
+  "conflict_rows_removed": 2,
+  "train_rows_after": 5378,
+  "rows_final": {
+    "train": 5378,
+    "val": 2275,
+    "test": 1607
+  },
+  "label_counts": {
+    "train": {
+      "Limitation of liability": 188,
+      "Unilateral termination": 136,
+      "Unilateral change": 119,
+      "Content removal": 72,
+      "Contract by using": 75,
+      "Choice of law": 36,
+      "Jurisdiction": 34,
+      "Arbitration": 28
+    },
+    "val": {
+      "Limitation of liability": 67,
+      "Unilateral termination": 59,
+      "Unilateral change": 28,
+      "Content removal": 32,
+      "Contract by using": 18,
+      "Choice of law": 18,
+      "Jurisdiction": 18,
+      "Arbitration": 9
+    },
+    "test": {
+      "Limitation of liability": 38,
+      "Unilateral termination": 38,
+      "Unilateral change": 38,
+      "Content removal": 13,
+      "Contract by using": 23,
+      "Choice of law": 13,
+      "Jurisdiction": 16,
+      "Arbitration": 7
+    }
+  },
+  "unfair_rate": {
+    "train": 0.1147,
+    "val": 0.1011,
+    "test": 0.107
+  }
+}

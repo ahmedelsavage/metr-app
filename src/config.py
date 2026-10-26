@@ -2,7 +2,6 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 SRC_DIR = Path(__file__).resolve().parent
 ENV_FILE = SRC_DIR / ".env"
 
@@ -32,6 +31,12 @@ class Settings(BaseSettings):
         env_file=ENV_FILE,
         extra="ignore",
     )
+
+    OCR_LANG: str = "ar"
+    OCR_USE_TEXTLINE_ORIENTATION: bool = True
+    OCR_PIPELINE_VERSION: str = "v1"
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 def get_settings():
