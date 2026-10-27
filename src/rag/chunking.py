@@ -3,8 +3,8 @@ from typing import List
 
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
 
-ARTICLE_SPLIT = re.compile(r"(?=^\s*ماد[ةه]\s*\(\s*[0-9٠-٩۰-۹]+\s*\))", re.MULTILINE)
-ARTICLE_HEAD = re.compile(r"^\s*ماد[ةه]\s*\(\s*([0-9٠-٩۰-۹]+)\s*\)")
+ARTICLE_SPLIT = re.compile(r"(?=\[[^\]\n]+\]\s*ماد[ةه]\s*\(\s*[0-9٠-٩۰-۹]+\s*\))")
+ARTICLE_HEAD = re.compile(r"^\[([^\]\n]+)\]\s*ماد[ةه]\s*\(\s*([0-9٠-٩۰-۹]+)\s*\)")
 
 MIN_LEN = 15
 
@@ -16,9 +16,12 @@ def by_article(text: str, size: int, overlap: int) -> List[dict]:
         if len(part) < MIN_LEN:
             continue
         m = ARTICLE_HEAD.match(part)
+        if not m:
+            continue
         chunks.append({
             "text": part,
-            "article_number": m.group(1).translate(DIGITS) if m else None,
+            "law_name": m.group(1).strip(),
+            "article_number": m.group(2).translate(DIGITS),
         })
     return chunks
 
