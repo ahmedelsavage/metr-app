@@ -45,7 +45,8 @@ class RAG:
             if text is None:
                 continue
             for c in chunk_text(text, strategy, self.s.CHUNK_SIZE, self.s.CHUNK_OVERLAP):
-                c["law_name"] = f.stem
+                if not c.get("law_name"):
+                    c["law_name"] = f.stem
                 chunks.append(c)
 
         if not chunks:
