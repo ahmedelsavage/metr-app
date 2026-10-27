@@ -1,3 +1,4 @@
+
 SUMMARY_PROMPT = """
 You are an assistant specialized in contract analysis.
 
@@ -145,7 +146,6 @@ Contract text:
 Retrieved legal context:
 {legal_context}
 
-{bert_section}
 Rules:
 
 1. Report only clear risks that are supported by the contract text.

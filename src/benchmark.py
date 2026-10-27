@@ -1,3 +1,4 @@
+
 import csv
 import json
 import os
@@ -250,7 +251,9 @@ def get_expected_risks(case):
         return []
 
     if not isinstance(expected, list):
-        raise ValueError(f"expected_risks must be a list in case {get_case_id(case)}")
+        raise ValueError(
+            f"expected_risks must be a list in case {get_case_id(case)}"
+        )
 
     labels = []
 
@@ -383,7 +386,6 @@ def evaluate_case(case, index=0):
     language = case.get("language", "en").lower()
     contract_text = case.get("contract_text", "")
     legal_context = case.get("legal_context", "")
-    bert_output = case.get("bert_output", case.get("bert_mock", []))
 
     if not isinstance(legal_context, str):
         legal_context = ""
@@ -424,21 +426,20 @@ def evaluate_case(case, index=0):
             contract_text=contract_text,
             legal_context=legal_context,
             language=language,
-            bert_output=bert_output,
         )
 
         raw_response = call_model(prompt)
         result["success"] = True
         result["raw_response"] = raw_response
 
-        # Strict check on the raw text (no cleaning).
+        # Strict check on raw text (no cleaning).
         try:
             json.loads(raw_response)
             result["valid_json"] = True
         except json.JSONDecodeError:
             result["valid_json"] = False
 
-        # valid_schema measures the FIRST try only.
+        # valid_schema measures FIRST try only.
         try:
             analysis = parse_analysis_response(raw_response)
             result["valid_schema"] = True
@@ -452,7 +453,6 @@ def evaluate_case(case, index=0):
                 generate_fn=call_model,
                 language=language,
                 max_retries=MAX_RETRIES,
-                bert_output=bert_output,
             )
             result["recovered_by_retry"] = True
 
@@ -498,7 +498,9 @@ def evaluate_case(case, index=0):
 def has_final_analysis(row):
     """True if we got a valid analysis (first try or after retry)."""
 
-    return row["valid_schema"] or (row["recovered_by_retry"] and not row["error"])
+    return row["valid_schema"] or (
+        row["recovered_by_retry"] and not row["error"]
+    )
 
 
 def calculate_summary(results):
@@ -510,7 +512,9 @@ def calculate_summary(results):
     successful = sum(r["success"] for r in results)
     valid_json = sum(r["valid_json"] for r in results)
     valid_schema = sum(r["valid_schema"] for r in results)
-    recovered = sum(r["recovered_by_retry"] and not r["error"] for r in results)
+    recovered = sum(
+        r["recovered_by_retry"] and not r["error"] for r in results
+    )
 
     tp = sum(r["tp"] for r in results)
     fp = sum(r["fp"] for r in results)
@@ -518,7 +522,11 @@ def calculate_summary(results):
 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall)
+        else 0.0
+    )
 
     latencies = sorted(
         r["latency_seconds"]
@@ -537,11 +545,16 @@ def calculate_summary(results):
     # Clean cases = no risk expected.
     clean_cases = [r for r in results if not r["expected_risks"]]
     clean_with_alarm = [
-        r for r in clean_cases if has_final_analysis(r) and r["predicted_risks"]
+        r for r in clean_cases
+        if has_final_analysis(r) and r["predicted_risks"]
     ]
-    clean_marked_safe = [r for r in clean_cases if r["predicted_verdict"] == "safe"]
+    clean_marked_safe = [
+        r for r in clean_cases if r["predicted_verdict"] == "safe"
+    ]
 
-    false_alarm_rate = len(clean_with_alarm) / len(clean_cases) if clean_cases else None
+    false_alarm_rate = (
+        len(clean_with_alarm) / len(clean_cases) if clean_cases else None
+    )
 
     severity_correct = sum(r["severity_correct"] for r in results)
     severity_total = sum(r["severity_total"] for r in results)
@@ -621,14 +634,25 @@ def save_results(results, summary, timestamp):
     ]
 
     with csv_path.open("w", newline="", encoding="utf-8-sig") as file:
-        writer = csv.DictWriter(file, fieldnames=csv_columns, extrasaction="ignore")
+        writer = csv.DictWriter(
+            file,
+            fieldnames=csv_columns,
+            extrasaction="ignore",
+        )
         writer.writeheader()
 
         for row in results:
             csv_row = dict(row)
 
-            for key in ("expected_risks", "predicted_risks", "predicted_severities"):
-                csv_row[key] = json.dumps(csv_row[key], ensure_ascii=False)
+            for key in (
+                "expected_risks",
+                "predicted_risks",
+                "predicted_severities",
+            ):
+                csv_row[key] = json.dumps(
+                    csv_row[key],
+                    ensure_ascii=False,
+                )
 
             writer.writerow(csv_row)
 
@@ -698,7 +722,11 @@ def main():
         save_results(results, calculate_summary(results), timestamp)
 
     summary = calculate_summary(results)
-    jsonl_path, csv_path, summary_path = save_results(results, summary, timestamp)
+    jsonl_path, csv_path, summary_path = save_results(
+        results,
+        summary,
+        timestamp,
+    )
 
     print("\n" + "=" * 50)
     print("BENCHMARK SUMMARY")

@@ -6,7 +6,7 @@ from pydantic import BaseModel, model_validator
 class OCRResult(BaseModel):
     text: str
     confidence: float = 0.0
-    language: str = "ar"
+    language: str = "unknown"
 
 
 # RAG Output

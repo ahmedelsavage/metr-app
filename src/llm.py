@@ -1,9 +1,9 @@
-import json
+
 import os
 import re
 import time
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import requests
 from dotenv import load_dotenv
@@ -20,7 +20,7 @@ from prompts.en import (
 from prompts.en import (
     SUMMARY_PROMPT as EN_SUMMARY_PROMPT,
 )
-from schemas import BERTClauseResult, ContractAnalysis
+from schemas import ContractAnalysis
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
@@ -66,50 +66,12 @@ def build_summary_prompt(
     return template.format(contract_text=contract_text)
 
 
-def build_bert_section(
-    bert_output: Optional[List[BERTClauseResult]],
-    language: str,
-) -> str:
-    """Return the BERT text, or an empty string if there is no BERT output."""
-
-    bert_data = []
-
-    for item in bert_output or []:
-        if isinstance(item, BERTClauseResult):
-            bert_data.append(item.model_dump())
-        else:
-            # Also support dictionary outputs from BERT.
-            validated_item = BERTClauseResult.model_validate(item)
-            bert_data.append(validated_item.model_dump())
-
-    if not bert_data:
-        return ""
-
-    bert_text = json.dumps(bert_data, ensure_ascii=False, indent=2)
-
-    if language == "ar":
-        return (
-            "نتائج تصنيف BERT للبنود:\n"
-            f"{bert_text}\n\n"
-            "استخدم نتائج BERT كإشارات مساعدة فقط، وليست أحكاماً "
-            "قانونية نهائية. تحقق دائماً من نص العقد نفسه.\n"
-        )
-
-    return (
-        "BERT clause classification results:\n"
-        f"{bert_text}\n\n"
-        "Use the BERT results only as helpful signals, not as final "
-        "legal conclusions. Always verify against the contract text.\n"
-    )
-
-
 def build_risk_prompt(
     contract_text: str,
     legal_context: str,
     language: str = "en",
-    bert_output: Optional[List[BERTClauseResult]] = None,
 ) -> str:
-    """Build a risk detection prompt with optional BERT results."""
+    """Build a risk detection prompt using contract text and legal context."""
 
     if not contract_text or not contract_text.strip():
         raise ValueError("contract_text cannot be empty")
@@ -124,7 +86,6 @@ def build_risk_prompt(
     return template.format(
         contract_text=contract_text,
         legal_context=legal_context,
-        bert_section=build_bert_section(bert_output, language),
     )
 
 
@@ -309,12 +270,14 @@ def analyze_contract(
     contract_text: str,
     legal_context: str,
     language: str = "en",
-    bert_output: Optional[List[BERTClauseResult]] = None,
     max_retries: int = 2,
     generate_fn: Optional[Callable[[str], str]] = None,
 ) -> ContractAnalysis:
     """
     Analyze a contract with Qwen3-8B and return a validated result.
+
+    The LLM receives the contract text and legal context only.
+    BERT results are not part of this function.
 
     generate_fn is optional. Leave it empty in the app. It exists only
     so tests can pass a fake model.
@@ -339,7 +302,6 @@ def analyze_contract(
         contract_text=contract_text,
         legal_context=legal_context,
         language=language,
-        bert_output=bert_output,
     )
 
     last_error = None
