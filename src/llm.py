@@ -8,16 +8,19 @@ from typing import Callable, List, Optional
 import requests
 from dotenv import load_dotenv
 
-from schemas import ContractAnalysis, BERTClauseResult
-
+from prompts.ar import (
+    RISK_DETECTION_PROMPT as AR_RISK_PROMPT,
+)
 from prompts.ar import (
     SUMMARY_PROMPT as AR_SUMMARY_PROMPT,
-    RISK_DETECTION_PROMPT as AR_RISK_PROMPT,
+)
+from prompts.en import (
+    RISK_DETECTION_PROMPT as EN_RISK_PROMPT,
 )
 from prompts.en import (
     SUMMARY_PROMPT as EN_SUMMARY_PROMPT,
-    RISK_DETECTION_PROMPT as EN_RISK_PROMPT,
 )
+from schemas import BERTClauseResult, ContractAnalysis
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
@@ -42,6 +45,7 @@ RETRY_STATUS_CODES = {429, 502, 503, 504}
 # --------------------------------------------------
 # Prompt building
 # --------------------------------------------------
+
 
 def build_summary_prompt(
     contract_text: str,
@@ -128,6 +132,7 @@ def build_risk_prompt(
 # Talking to the Qwen3-8B server (Kaggle + ngrok)
 # --------------------------------------------------
 
+
 def _read_env(name: str) -> str:
     """Read an env variable and remove spaces and quotes."""
 
@@ -188,7 +193,8 @@ def _post_with_connection_retry(url: str, headers: dict, payload: dict):
         f"attempts. Last error: {last_error}"
     )
 
-#response from the server
+
+# response from the server
 def _extract_text(data) -> str:
     """Find the generated text in the server response."""
 
@@ -263,6 +269,7 @@ def get_generate_fn() -> Callable[[str], str]:
 # Parsing and validation
 # --------------------------------------------------
 
+
 def clean_json_text(text: str) -> str:
     """Remove <think> blocks, Markdown fences, and text around the JSON."""
 
@@ -274,7 +281,7 @@ def clean_json_text(text: str) -> str:
     end = text.rfind("}")
 
     if start != -1 and end > start:
-        text = text[start:end + 1]
+        text = text[start : end + 1]
 
     return text
 
@@ -288,9 +295,7 @@ def parse_analysis_response(
         raise ValueError("The LLM response is empty.")
 
     try:
-        return ContractAnalysis.model_validate_json(
-            clean_json_text(response_text)
-        )
+        return ContractAnalysis.model_validate_json(clean_json_text(response_text))
     except ValueError as error:
         raise ValueError(f"Invalid ContractAnalysis JSON: {error}") from error
 
@@ -298,6 +303,7 @@ def parse_analysis_response(
 # --------------------------------------------------
 # Main function used by the app
 # --------------------------------------------------
+
 
 def analyze_contract(
     contract_text: str,

@@ -2,7 +2,7 @@
 
 **Confidence:** 0.9866
 
-**Language:** ar
+**Language:** en
 
 ## Extracted Text
 

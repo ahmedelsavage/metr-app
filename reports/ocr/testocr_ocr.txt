@@ -8,4 +8,4 @@ jumped over the lazy fox. The quick
 brown dog jumped over the lazy fox.
 
 Confidence: 0.9866
-Language: ar
+Language: en

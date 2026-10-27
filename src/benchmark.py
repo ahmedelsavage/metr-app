@@ -85,6 +85,7 @@ def read_env(name):
 # Call the model
 # --------------------------------------------------
 
+
 def get_generate_url():
     """Return the full /generate URL for the selected Qwen model."""
 
@@ -219,11 +220,10 @@ def call_model(prompt):
 # Load and check test cases
 # --------------------------------------------------
 
+
 def load_cases():
     if not CASES_PATH.exists():
-        raise FileNotFoundError(
-            f"Benchmark cases file not found: {CASES_PATH}"
-        )
+        raise FileNotFoundError(f"Benchmark cases file not found: {CASES_PATH}")
 
     with CASES_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
@@ -250,9 +250,7 @@ def get_expected_risks(case):
         return []
 
     if not isinstance(expected, list):
-        raise ValueError(
-            f"expected_risks must be a list in case {get_case_id(case)}"
-        )
+        raise ValueError(f"expected_risks must be a list in case {get_case_id(case)}")
 
     labels = []
 
@@ -260,20 +258,12 @@ def get_expected_risks(case):
         if isinstance(item, str):
             label = item
         elif isinstance(item, dict):
-            label = (
-                item.get("label")
-                or item.get("risk_type")
-                or item.get("category")
-            )
+            label = item.get("label") or item.get("risk_type") or item.get("category")
         else:
-            raise ValueError(
-                f"Invalid risk format in case {get_case_id(case)}"
-            )
+            raise ValueError(f"Invalid risk format in case {get_case_id(case)}")
 
         if not isinstance(label, str):
-            raise ValueError(
-                f"Missing risk label in case {get_case_id(case)}"
-            )
+            raise ValueError(f"Missing risk label in case {get_case_id(case)}")
 
         label = label.strip().lower()
 
@@ -337,13 +327,12 @@ def select_cases(cases, args):
 
     wanted = {arg.strip().lower() for arg in args}
     selected = [
-        case for index, case in enumerate(cases, start=1)
+        case
+        for index, case in enumerate(cases, start=1)
         if get_case_id(case, index).lower() in wanted
     ]
 
-    found = {
-        get_case_id(case).lower() for case in selected
-    }
+    found = {get_case_id(case).lower() for case in selected}
     missing = wanted - found
 
     if missing:
@@ -355,6 +344,7 @@ def select_cases(cases, args):
 # --------------------------------------------------
 # Extract predictions
 # --------------------------------------------------
+
 
 def get_predicted_risks(analysis):
     labels = []
@@ -386,6 +376,7 @@ def get_predicted_severities(analysis):
 # --------------------------------------------------
 # Evaluate one case
 # --------------------------------------------------
+
 
 def evaluate_case(case, index=0):
     case_id = get_case_id(case, index)
@@ -503,6 +494,7 @@ def evaluate_case(case, index=0):
 # Calculate metrics
 # --------------------------------------------------
 
+
 def has_final_analysis(row):
     """True if we got a valid analysis (first try or after retry)."""
 
@@ -526,11 +518,7 @@ def calculate_summary(results):
 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
-    f1 = (
-        2 * precision * recall / (precision + recall)
-        if (precision + recall)
-        else 0.0
-    )
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
 
     latencies = sorted(
         r["latency_seconds"]
@@ -549,16 +537,11 @@ def calculate_summary(results):
     # Clean cases = no risk expected.
     clean_cases = [r for r in results if not r["expected_risks"]]
     clean_with_alarm = [
-        r for r in clean_cases
-        if has_final_analysis(r) and r["predicted_risks"]
+        r for r in clean_cases if has_final_analysis(r) and r["predicted_risks"]
     ]
-    clean_marked_safe = [
-        r for r in clean_cases if r["predicted_verdict"] == "safe"
-    ]
+    clean_marked_safe = [r for r in clean_cases if r["predicted_verdict"] == "safe"]
 
-    false_alarm_rate = (
-        len(clean_with_alarm) / len(clean_cases) if clean_cases else None
-    )
+    false_alarm_rate = len(clean_with_alarm) / len(clean_cases) if clean_cases else None
 
     severity_correct = sum(r["severity_correct"] for r in results)
     severity_total = sum(r["severity_total"] for r in results)
@@ -599,6 +582,7 @@ def calculate_summary(results):
 # Save results
 # --------------------------------------------------
 
+
 def save_results(results, summary, timestamp):
     """Writes the SAME files during one run (no pile-up of files)."""
 
@@ -613,18 +597,31 @@ def save_results(results, summary, timestamp):
             file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     csv_columns = [
-        "model", "case_id", "language", "success", "valid_json",
-        "valid_schema", "recovered_by_retry", "first_try_error", "error",
-        "latency_seconds", "expected_risks", "predicted_risks",
-        "predicted_severities", "expected_verdict", "predicted_verdict",
-        "verdict_correct", "tp", "fp", "fn",
-        "severity_correct", "severity_total",
+        "model",
+        "case_id",
+        "language",
+        "success",
+        "valid_json",
+        "valid_schema",
+        "recovered_by_retry",
+        "first_try_error",
+        "error",
+        "latency_seconds",
+        "expected_risks",
+        "predicted_risks",
+        "predicted_severities",
+        "expected_verdict",
+        "predicted_verdict",
+        "verdict_correct",
+        "tp",
+        "fp",
+        "fn",
+        "severity_correct",
+        "severity_total",
     ]
 
     with csv_path.open("w", newline="", encoding="utf-8-sig") as file:
-        writer = csv.DictWriter(
-            file, fieldnames=csv_columns, extrasaction="ignore"
-        )
+        writer = csv.DictWriter(file, fieldnames=csv_columns, extrasaction="ignore")
         writer.writeheader()
 
         for row in results:
@@ -644,6 +641,7 @@ def save_results(results, summary, timestamp):
 # --------------------------------------------------
 # Main
 # --------------------------------------------------
+
 
 def main():
     if RUN_MODEL not in MODEL_CONFIG:
