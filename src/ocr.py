@@ -21,6 +21,13 @@ def get_ocr(lang: str):
     return _ocr_engine
 
 
+def detect_language(text: str) -> str:
+    if _ARABIC_PATTERN.search(text):
+        return "ar"
+    else:
+        return "en"
+
+
 def _sort_reading_order(
     texts: list[str], scores: list[float], boxes: list
 ) -> tuple[str, float]:
@@ -82,7 +89,7 @@ def extract_text(image: str, lang="") -> OCRResult:
     return OCRResult(
         text=full_text,
         confidence=confidence,
-        language=lang or get_settings().OCR_LANG,
+        language=detect_language(full_text),
     )
 
 
