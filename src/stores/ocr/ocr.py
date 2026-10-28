@@ -9,25 +9,33 @@ from config import get_settings
 ARABIC_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F]")
 LATIN_RE = re.compile(r"[A-Za-z]")
 
-_MIN_LONG_SIDE = 1800
-_TARGET_LONG_SIDE = 2500
-_MAX_UPSCALE = 3.0
-_MAX_LONG_SIDE = 4000
+_MIN_LONG_SIDE = 1200
+_TARGET_LONG_SIDE = 1600
+_MAX_UPSCALE = 2.0
+_MAX_LONG_SIDE = 2000
 
-_ocr_engine = None
+_ocr_engines = {}
 
 
 def get_ocr(lang: str = ""):
-    global _ocr_engine
-    if _ocr_engine is None:
+    global _ocr_engines
+    settings = get_settings()
+    resolved_lang = lang or settings.OCR_LANG
+    if resolved_lang not in _ocr_engines:
         from paddleocr import PaddleOCR
 
-        settings = get_settings()
-        _ocr_engine = PaddleOCR(
-            use_textline_orientation=settings.OCR_USE_TEXTLINE_ORIENTATION,
-            lang=lang or settings.OCR_LANG,
-        )
-    return _ocr_engine
+        kwargs = {
+            "lang": resolved_lang,
+            "use_doc_orientation_classify": settings.OCR_USE_DOC_ORIENTATION,
+            "use_doc_unwarping": settings.OCR_USE_DOC_UNWARPING,
+            "use_textline_orientation": settings.OCR_USE_TEXTLINE_ORIENTATION,
+        }
+        if settings.OCR_DET_MODEL:
+            kwargs["text_detection_model_name"] = settings.OCR_DET_MODEL
+        if settings.OCR_DET_LIMIT_SIDE_LEN and settings.OCR_DET_LIMIT_SIDE_LEN > 0:
+            kwargs["text_det_limit_side_len"] = settings.OCR_DET_LIMIT_SIDE_LEN
+        _ocr_engines[resolved_lang] = PaddleOCR(**kwargs)
+    return _ocr_engines[resolved_lang]
 
 
 def resize_image(img: np.ndarray) -> np.ndarray:

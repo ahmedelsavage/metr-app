@@ -33,7 +33,11 @@ class Settings(BaseSettings):
     )
 
     OCR_LANG: str = "ar"
-    OCR_USE_TEXTLINE_ORIENTATION: bool = True
+    OCR_USE_DOC_ORIENTATION: bool = False
+    OCR_USE_DOC_UNWARPING: bool = False
+    OCR_USE_TEXTLINE_ORIENTATION: bool = False
+    OCR_DET_MODEL: str = "PP-OCRv5_mobile_det"
+    OCR_DET_LIMIT_SIDE_LEN: int = 0
     OCR_PIPELINE_VERSION: str = "v1"
 
 

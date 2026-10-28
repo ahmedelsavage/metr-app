@@ -9,7 +9,7 @@ from stores.ocr import ARABIC_RE, LATIN_RE, read_image
 from schemas import OCRResult
 
 _IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
-_PDF_DPI = 300
+_PDF_DPI = 200
 _MAX_PAGES = 20
 _MAX_FILE_MB = 15
 
@@ -40,6 +40,9 @@ def detect_file_type(path: Path) -> str:
     return "unknown"
 
 
+_TEXT_LAYER_MIN_CHARS = 30
+
+
 def _read_pdf(path: Path, lang: str):
     texts, scores = [], []
     with pymupdf.open(str(path)) as doc:
@@ -48,6 +51,12 @@ def _read_pdf(path: Path, lang: str):
         if len(doc) > _MAX_PAGES:
             raise ValueError(f"PDF has {len(doc)} pages (max {_MAX_PAGES})")
         for page in doc:
+            page_text = (page.get_text() or "").strip()  # type: ignore
+            if len(page_text) >= _TEXT_LAYER_MIN_CHARS:
+                texts.append(page_text)
+                scores.append(1.0)
+                continue
+
             pix = page.get_pixmap(dpi=_PDF_DPI, alpha=False)
             img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, 3)
             text, conf = read_image(cv2.cvtColor(img, cv2.COLOR_RGB2BGR), lang)
