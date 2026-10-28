@@ -3,6 +3,7 @@ import re
 from schemas import RetrievedChunk, ContractAnalysis
 from stores.llm import analyze_contract
 from stores.rag import RAG
+from ingest import process_file
 
 def deduplicate_chunks(chunks: List[RetrievedChunk]) -> List[RetrievedChunk]:
     best = {}
@@ -63,5 +64,22 @@ def analyze_contract_text(
         contract_text=contract_text,
         legal_context=legal_context,
         language=language,
+        generate_fn=generate_fn,
+    )
+
+def analyze_file(
+    path,
+    rag: RAG,
+    language: str = "ar",
+    limit_per_clause: int = 5,
+    generate_fn=None,
+) -> ContractAnalysis:
+    ocr_result = process_file(path)
+
+    return analyze_contract_text(
+        ocr_result.text,
+        rag,
+        language=language,
+        limit_per_clause=limit_per_clause,
         generate_fn=generate_fn,
     )
