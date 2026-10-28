@@ -12,3 +12,4 @@ app = FastAPI(title="Metr API", lifespan=lifespan)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
