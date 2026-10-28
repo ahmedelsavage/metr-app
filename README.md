@@ -4,6 +4,10 @@
 docker-compose up --build
 ```
 
+```bash
+http://localhost:8501
+```
+
 # Data source
 
 - Source: `coastalcph/lex_glue`, subset `unfair_tos`
