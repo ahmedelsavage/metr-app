@@ -4,7 +4,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-from src.config import get_settings
+from config import get_settings
 
 ARABIC_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F]")
 LATIN_RE = re.compile(r"[A-Za-z]")

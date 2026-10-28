@@ -36,8 +36,6 @@ class Settings(BaseSettings):
     OCR_USE_TEXTLINE_ORIENTATION: bool = True
     OCR_PIPELINE_VERSION: str = "v1"
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
 
 def get_settings():
     return Settings()

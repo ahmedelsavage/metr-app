@@ -1,9 +1,8 @@
 from typing import List, Optional
 import re
 from schemas import RetrievedChunk, ContractAnalysis
-from llm import analyze_contract
-from rag import RAG
-
+from stores.llm import analyze_contract
+from stores.rag import RAG
 
 def deduplicate_chunks(chunks: List[RetrievedChunk]) -> List[RetrievedChunk]:
     best = {}

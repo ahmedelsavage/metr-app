@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 import pymupdf
 
-from src.ocr import ARABIC_RE, LATIN_RE, read_image
-from src.schemas import OCRResult
+from stores.ocr import ARABIC_RE, LATIN_RE, read_image
+from schemas import OCRResult
 
 _IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 _PDF_DPI = 300
