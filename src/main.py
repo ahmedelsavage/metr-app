@@ -89,7 +89,6 @@ def summarize(
         lambda: summarize_contract(
             contract_text=contract_text,
             language=language,
-            generate_fn=fake_generate_fn,
         )
     )
     return {"summary": summary}
