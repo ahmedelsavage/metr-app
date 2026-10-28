@@ -13,7 +13,7 @@ from stores.rag import RAG
 from schemas import RetrievedChunk, ContractAnalysis
 from ingest import process_file
 from stores.llm import analyze_contract, summarize_contract
-from pipeline import split_clauses, gather_legal_chunks, build_legal_context
+from pipeline import split_clauses, gather_legal_chunks, build_legal_context, deduplicate_chunks
 
 
 class AnalyzeResponse(BaseModel):
@@ -105,8 +105,11 @@ def analyze(
     contract_text = get_text_from_input(file, text)
 
     clauses = split_clauses(contract_text)
-    chunks = gather_legal_chunks(rag, clauses, limit_per_clause)
-    legal_context_str = build_legal_context(chunks)
+    raw_chunks = gather_legal_chunks(rag, clauses, limit_per_clause)
+    
+    unique_chunks = deduplicate_chunks(raw_chunks)
+    
+    legal_context_str = build_legal_context(unique_chunks)
 
     analysis_result = run_llm(
         lambda: analyze_contract(
@@ -116,4 +119,4 @@ def analyze(
         )
     )
 
-    return AnalyzeResponse(analysis=analysis_result, legal_context=chunks)
+    return AnalyzeResponse(analysis=analysis_result, legal_context=unique_chunks)
