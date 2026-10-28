@@ -1,37 +1,32 @@
+
 import csv
 import json
+import math
 import os
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
-import requests
 from dotenv import load_dotenv
-
-from stores.llm import (
-    analyze_contract,
-    build_risk_prompt,
-    generate_response,
-    parse_analysis_response,
-)
-
-# --------------------------------------------------
-# Configuration
-# --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-# Choose ONE: "Qwen3-8B", "Qwen3-4B", or "Nemotron"
-RUN_MODEL = "Qwen3-8B"
+from stores.llm import (
+    analyze_contract,
+    generate_response,
+)
+from stores.llm.log_mlflow import log_benchmark_run
 
-# Names of the .env variables for each model: (URL, KEY)
-MODEL_CONFIG = {
-    "Qwen3-8B": ("QWEN8_API_URL", "QWEN8_API_KEY"),
-    "Qwen3-4B": ("QWEN_API_URL", "MODEL_API_KEY"),
-    "Nemotron": None,  # uses LLM_* variables through llm.py
-}
+
+# =========================
+# Configuration
+# =========================
+
+RUN_MODEL = "Qwen3-8B"
+PROMPT_VERSION = "v1"
+MAX_RETRIES = 2
 
 CASES_PATH = Path(
     os.getenv(
@@ -43,522 +38,301 @@ CASES_PATH = Path(
 OUTPUT_DIR = BASE_DIR / "benchmark_results"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-REQUEST_TIMEOUT = 240
-MAX_RETRIES = 2  # retries for invalid JSON/schema (model output)
 
-# Connection retry settings (network problems only)
-CONNECTION_ATTEMPTS = 3
-CONNECTION_WAIT_SECONDS = 3
-RETRY_STATUS_CODES = {429, 502, 503, 504}
+# =========================
+# Helper functions
+# =========================
 
-RISK_TYPES = {
-    "unilateral_change",
-    "unilateral_termination",
-    "unlimited_liability",
-    "liability_exclusion",
-    "unfair_arbitration",
-    "unfair_deduction",
-    "unfair_content_removal",
-    "other",
-}
+def normalize_label(value):
+    """Normalize labels to make comparisons consistent."""
+    if value is None:
+        return ""
 
-SEVERITIES = {"low", "medium", "high"}
+    if isinstance(value, dict):
+        value = value.get("risk_type", value.get("label", ""))
+
+    return str(value).strip().lower().replace(" ", "_").replace("-", "_")
 
 
-def read_env(name):
-    """Read an env variable and remove spaces and quotes."""
+def get_contract_text(case):
+    """Support common contract-text field names."""
+    for key in ("contract_text", "text", "contract", "input_text"):
+        value = case.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
 
-    value = os.getenv(name) or ""
-    return value.strip().strip('"').strip("'")
-
-
-# --------------------------------------------------
-# Call the model
-# --------------------------------------------------
-
-
-def get_generate_url():
-    """Return the full /generate URL for the selected Qwen model."""
-
-    url_name, _ = MODEL_CONFIG[RUN_MODEL]
-    url = read_env(url_name)
-
-    if not url:
-        raise ValueError(f"{url_name} is missing from .env")
-
-    url = url.rstrip("/")
-
-    if not url.endswith("/generate"):
-        url += "/generate"
-
-    return url
-
-
-def post_with_connection_retry(url, headers, payload):
-    """
-    POST to the server. Retry ONLY for connection drops and
-    temporary server errors. Do not retry if the model already
-    answered, and do not retry a long read timeout.
-    """
-
-    last_error = None
-
-    for attempt in range(1, CONNECTION_ATTEMPTS + 1):
-        try:
-            response = requests.post(
-                url,
-                json=payload,
-                headers=headers,
-                timeout=REQUEST_TIMEOUT,
-            )
-
-            if response.status_code in RETRY_STATUS_CODES:
-                last_error = RuntimeError(
-                    f"HTTP {response.status_code} from {response.url} | "
-                    f"Server said: {response.text[:200]}"
-                )
-            else:
-                return response
-
-        except (requests.ConnectionError, requests.ConnectTimeout) as error:
-            last_error = error
-
-        if attempt < CONNECTION_ATTEMPTS:
-            wait = CONNECTION_WAIT_SECONDS * attempt
-            print(
-                f"    Connection problem (attempt {attempt}/"
-                f"{CONNECTION_ATTEMPTS}). Retrying in {wait}s..."
-            )
-            time.sleep(wait)
-
-    raise RuntimeError(
-        f"Server not reachable after {CONNECTION_ATTEMPTS} attempts. "
-        f"Last error: {last_error}"
-    )
-
-
-def call_qwen(prompt):
-    """Send a prompt to the Qwen API and return raw text."""
-
-    _, key_name = MODEL_CONFIG[RUN_MODEL]
-    api_key = read_env(key_name)
-
-    if not api_key:
-        raise ValueError(f"{key_name} is missing from .env")
-
-    response = post_with_connection_retry(
-        get_generate_url(),
-        headers={
-            "x-api-key": api_key,
-            # Skips the ngrok free-plan warning page.
-            "ngrok-skip-browser-warning": "true",
-        },
-        payload={"prompt": prompt},
-    )
-
-    if not response.ok:
-        raise RuntimeError(
-            f"HTTP {response.status_code} from {response.url} | "
-            f"Server said: {response.text[:300]}"
-        )
-
-    data = response.json()
-
-    if isinstance(data, str):
-        return data.strip()
-
-    if isinstance(data, dict):
-        for key in ("text", "response", "generated_text", "output"):
-            value = data.get(key)
-
-            if isinstance(value, str) and value.strip():
-                return value.strip()
-
-        choices = data.get("choices")
-
-        if isinstance(choices, list) and choices:
-            first = choices[0]
-
-            if isinstance(first, dict):
-                message = first.get("message", {})
-
-                if isinstance(message, dict):
-                    content = message.get("content")
-
-                    if isinstance(content, str) and content.strip():
-                        return content.strip()
-
-                content = first.get("text")
-
-                if isinstance(content, str) and content.strip():
-                    return content.strip()
-
-    raise ValueError(
-        f"Could not find generated text in API response: {str(data)[:300]}"
-    )
-
-
-def call_model(prompt):
-    """Call the selected model."""
-
-    if RUN_MODEL == "Nemotron":
-        return generate_response(prompt)
-
-    return call_qwen(prompt)
-
-
-# --------------------------------------------------
-# Load and check test cases
-# --------------------------------------------------
-
-
-def load_cases():
-    if not CASES_PATH.exists():
-        raise FileNotFoundError(f"Benchmark cases file not found: {CASES_PATH}")
-
-    with CASES_PATH.open("r", encoding="utf-8") as file:
-        data = json.load(file)
-
-    if isinstance(data, dict):
-        data = data.get("cases", [])
-
-    if not isinstance(data, list) or not data:
-        raise ValueError("The cases file must contain a list of cases.")
-
-    return data
-
-
-def get_case_id(case, index=0):
-    return str(case.get("case_id", case.get("id", f"case_{index}")))
+    return ""
 
 
 def get_expected_risks(case):
-    """Return a sorted list of expected risk labels."""
+    """Read expected risk labels from a benchmark case."""
+    values = case.get("expected_risks", [])
 
-    expected = case.get("expected_risks", [])
+    if not isinstance(values, list):
+        return set()
 
-    if expected is None:
-        return []
-
-    if not isinstance(expected, list):
-        raise ValueError(
-            f"expected_risks must be a list in case {get_case_id(case)}"
-        )
-
-    labels = []
-
-    for item in expected:
-        if isinstance(item, str):
-            label = item
-        elif isinstance(item, dict):
-            label = item.get("label") or item.get("risk_type") or item.get("category")
-        else:
-            raise ValueError(f"Invalid risk format in case {get_case_id(case)}")
-
-        if not isinstance(label, str):
-            raise ValueError(f"Missing risk label in case {get_case_id(case)}")
-
-        label = label.strip().lower()
-
-        if label not in RISK_TYPES:
-            raise ValueError(
-                f"Unknown risk label '{label}' in case {get_case_id(case)}"
-            )
-
-        labels.append(label)
-
-    return sorted(set(labels))
-
-
-def get_expected_severities(case):
-    """Return {label: severity} from the case file."""
-
-    severities = {}
-
-    for item in case.get("expected_risks", []) or []:
-        if not isinstance(item, dict):
-            continue
-
-        label = item.get("label") or item.get("risk_type") or item.get("category")
-        severity = item.get("severity")
-
-        if isinstance(label, str) and isinstance(severity, str):
-            severities[label.strip().lower()] = severity.strip().lower()
-
-    return severities
-
-
-def validate_all_cases(cases):
-    """Check every case BEFORE running, so we do not fail in the middle."""
-
-    for index, case in enumerate(cases, start=1):
-        case_id = get_case_id(case, index)
-        text = case.get("contract_text")
-
-        if not isinstance(text, str) or not text.strip():
-            raise ValueError(f"Missing contract_text in case {case_id}")
-
-        if case.get("language", "en").lower() not in ("ar", "en"):
-            raise ValueError(f"Language must be 'ar' or 'en' in case {case_id}")
-
-        get_expected_risks(case)
-
-
-def select_cases(cases, args):
-    """
-    python benchmark.py            -> all cases
-    python benchmark.py 3          -> first 3 cases
-    python benchmark.py V3_AR05    -> only this case
-    python benchmark.py A B C      -> only these cases
-    """
-
-    if not args:
-        return cases
-
-    if len(args) == 1 and args[0].isdigit():
-        return cases[: int(args[0])]
-
-    wanted = {arg.strip().lower() for arg in args}
-    selected = [
-        case
-        for index, case in enumerate(cases, start=1)
-        if get_case_id(case, index).lower() in wanted
-    ]
-
-    found = {get_case_id(case).lower() for case in selected}
-    missing = wanted - found
-
-    if missing:
-        raise ValueError(f"Case IDs not found in file: {sorted(missing)}")
-
-    return selected
-
-
-# --------------------------------------------------
-# Extract predictions
-# --------------------------------------------------
+    return {
+        normalize_label(value)
+        for value in values
+        if normalize_label(value)
+    }
 
 
 def get_predicted_risks(analysis):
-    labels = []
+    """Extract predicted risk labels from the analysis result."""
+    if hasattr(analysis, "model_dump"):
+        analysis = analysis.model_dump()
 
-    for risk in analysis.risks:
-        if risk.risk_type not in RISK_TYPES:
-            raise ValueError(f"Unexpected risk_type: {risk.risk_type}")
+    if not isinstance(analysis, dict):
+        raise ValueError("Analysis result is not a dictionary.")
 
-        labels.append(risk.risk_type)
+    risks = analysis.get("risks", [])
 
-    return sorted(set(labels))
+    if not isinstance(risks, list):
+        raise ValueError("The risks field is not a list.")
+
+    labels = set()
+
+    for risk in risks:
+        if isinstance(risk, dict):
+            label = risk.get("risk_type")
+        else:
+            label = getattr(risk, "risk_type", None)
+
+        normalized = normalize_label(label)
+
+        if normalized:
+            labels.add(normalized)
+
+    return labels
 
 
-def get_predicted_severities(analysis):
-    """One severity per category. Keep the highest if repeated."""
+def get_analysis_dict(analysis):
+    """Convert a Pydantic result into a regular dictionary."""
+    if hasattr(analysis, "model_dump"):
+        return analysis.model_dump()
 
-    priority = {"low": 1, "medium": 2, "high": 3}
-    severities = {}
+    if isinstance(analysis, dict):
+        return analysis
 
-    for risk in analysis.risks:
-        current = severities.get(risk.risk_type)
-
-        if current is None or priority[risk.severity] > priority[current]:
-            severities[risk.risk_type] = risk.severity
-
-    return severities
+    raise ValueError("Unsupported analysis result type.")
 
 
-# --------------------------------------------------
+def safe_rate(numerator, denominator):
+    if denominator == 0:
+        return 0.0
+    return numerator / denominator
+
+
+def percentile_95(values):
+    if not values:
+        return 0.0
+
+    sorted_values = sorted(values)
+    index = math.ceil(0.95 * len(sorted_values)) - 1
+    return sorted_values[max(0, index)]
+
+
+# =========================
 # Evaluate one case
-# --------------------------------------------------
+# =========================
 
-
-def evaluate_case(case, index=0):
-    case_id = get_case_id(case, index)
-    language = case.get("language", "en").lower()
-    contract_text = case.get("contract_text", "")
-    legal_context = case.get("legal_context", "")
-
-    if not isinstance(legal_context, str):
-        legal_context = ""
-
+def evaluate_case(case):
+    case_id = case.get("id", "unknown")
+    contract_text = get_contract_text(case)
     expected_risks = get_expected_risks(case)
-    expected_severities = get_expected_severities(case)
-    expected_verdict = "risky" if expected_risks else "safe"
 
     result = {
-        "model": RUN_MODEL,
-        "case_id": case_id,
-        "language": language,
+        "id": case_id,
         "success": False,
+        "error": None,
+        "latency_seconds": 0.0,
+        "generate_calls": 0,
         "valid_json": False,
-        "valid_schema": False,
+        "valid_schema_first_try": False,
         "recovered_by_retry": False,
-        "first_try_error": "",
-        "error": "",
-        "latency_seconds": None,
-        "expected_risks": expected_risks,
+        "expected_risks": sorted(expected_risks),
         "predicted_risks": [],
-        "predicted_severities": {},
-        "expected_verdict": expected_verdict,
-        "predicted_verdict": "",
-        "verdict_correct": False,
         "tp": 0,
         "fp": 0,
-        "fn": len(expected_risks),
+        "fn": 0,
+        "verdict_correct": False,
         "severity_correct": 0,
         "severity_total": 0,
-        "raw_response": None,
+        "analysis": None,
     }
+
+    if not contract_text:
+        result["error"] = "No contract text found in this case."
+        return result
+
+    generated_responses = []
+
+    def tracked_generate(prompt):
+        """Count model calls and retain raw responses for evaluation."""
+        result["generate_calls"] += 1
+        response = generate_response(prompt)
+        generated_responses.append(response)
+        return response
 
     start_time = time.perf_counter()
 
     try:
-        prompt = build_risk_prompt(
+        analysis = analyze_contract(
             contract_text=contract_text,
-            legal_context=legal_context,
-            language=language,
+            legal_context=case.get("legal_context", ""),
+            language=case.get("language", "en"),
+            generate_fn=tracked_generate,
+            max_retries=MAX_RETRIES,
         )
 
-        raw_response = call_model(prompt)
-        result["success"] = True
-        result["raw_response"] = raw_response
-
-        # Strict check on raw text (no cleaning).
-        try:
-            json.loads(raw_response)
-            result["valid_json"] = True
-        except json.JSONDecodeError:
-            result["valid_json"] = False
-
-        # valid_schema measures FIRST try only.
-        try:
-            analysis = parse_analysis_response(raw_response)
-            result["valid_schema"] = True
-        except ValueError as first_error:
-            result["first_try_error"] = str(first_error)[:400]
-
-            # Same behavior as the real app: retry with the error message.
-            analysis = analyze_contract(
-                contract_text=contract_text,
-                legal_context=legal_context,
-                generate_fn=call_model,
-                language=language,
-                max_retries=MAX_RETRIES,
-            )
-            result["recovered_by_retry"] = True
-
+        analysis_dict = get_analysis_dict(analysis)
         predicted_risks = get_predicted_risks(analysis)
-        predicted_severities = get_predicted_severities(analysis)
 
-        expected_set = set(expected_risks)
-        predicted_set = set(predicted_risks)
+        result["success"] = True
+        result["analysis"] = analysis_dict
+        result["predicted_risks"] = sorted(predicted_risks)
 
-        result["predicted_risks"] = predicted_risks
-        result["predicted_severities"] = predicted_severities
-        result["predicted_verdict"] = analysis.verdict
-        result["verdict_correct"] = analysis.verdict == expected_verdict
+        # JSON validity: at least one response was valid JSON.
+        for raw_response in generated_responses:
+            try:
+                if isinstance(raw_response, dict):
+                    result["valid_json"] = True
+                    break
 
-        result["tp"] = len(expected_set & predicted_set)
-        result["fp"] = len(predicted_set - expected_set)
-        result["fn"] = len(expected_set - predicted_set)
+                json.loads(raw_response)
+                result["valid_json"] = True
+                break
+            except (TypeError, json.JSONDecodeError):
+                continue
 
-        for label in expected_set & predicted_set:
-            expected_sev = expected_severities.get(label)
-            predicted_sev = predicted_severities.get(label)
+        # A successful result on one call means no retry was needed.
+        result["valid_schema_first_try"] = (
+            result["generate_calls"] == 1
+        )
 
-            if expected_sev in SEVERITIES and predicted_sev in SEVERITIES:
+        result["recovered_by_retry"] = (
+            result["generate_calls"] > 1
+        )
+
+        # Risk-label metrics.
+        expected = expected_risks
+        predicted = predicted_risks
+
+        result["tp"] = len(expected & predicted)
+        result["fp"] = len(predicted - expected)
+        result["fn"] = len(expected - predicted)
+
+        # Expected verdict: safe if there are no expected risks.
+        expected_verdict = "risky" if expected else "safe"
+        actual_verdict = normalize_label(
+            analysis_dict.get("verdict", "")
+        )
+
+        result["verdict_correct"] = (
+            actual_verdict == expected_verdict
+        )
+
+        # Compare severity only for risk types with expected severity labels.
+        expected_severities = case.get("expected_severities", {})
+
+        if isinstance(expected_severities, dict):
+            predicted_severities = {}
+
+            for risk in analysis_dict.get("risks", []):
+                if isinstance(risk, dict):
+                    risk_type = normalize_label(risk.get("risk_type"))
+                    severity = normalize_label(risk.get("severity"))
+                    if risk_type:
+                        predicted_severities[risk_type] = severity
+
+            for risk_type, expected_severity in expected_severities.items():
+                risk_type = normalize_label(risk_type)
+                expected_severity = normalize_label(expected_severity)
+
+                if not expected_severity:
+                    continue
+
                 result["severity_total"] += 1
 
-                if expected_sev == predicted_sev:
+                if predicted_severities.get(risk_type) == expected_severity:
                     result["severity_correct"] += 1
 
-    except Exception as error:
-        result["error"] = f"{type(error).__name__}: {error}"
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
 
     finally:
-        result["latency_seconds"] = round(time.perf_counter() - start_time, 3)
+        result["latency_seconds"] = round(
+            time.perf_counter() - start_time, 4
+        )
 
     return result
 
 
-# --------------------------------------------------
-# Calculate metrics
-# --------------------------------------------------
-
-
-def has_final_analysis(row):
-    """True if we got a valid analysis (first try or after retry)."""
-
-    return row["valid_schema"] or (
-        row["recovered_by_retry"] and not row["error"]
-    )
-
+# =========================
+# Calculate summary metrics
+# =========================
 
 def calculate_summary(results):
     total = len(results)
 
-    if total == 0:
-        return {"model": RUN_MODEL, "total_cases": 0}
-
     successful = sum(r["success"] for r in results)
     valid_json = sum(r["valid_json"] for r in results)
-    valid_schema = sum(r["valid_schema"] for r in results)
-    recovered = sum(
-        r["recovered_by_retry"] and not r["error"] for r in results
+    valid_schema_first = sum(
+        r["valid_schema_first_try"] for r in results
     )
+    recovered = sum(r["recovered_by_retry"] for r in results)
 
     tp = sum(r["tp"] for r in results)
     fp = sum(r["fp"] for r in results)
     fn = sum(r["fn"] for r in results)
 
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    precision = safe_rate(tp, tp + fp)
+    recall = safe_rate(tp, tp + fn)
     f1 = (
         2 * precision * recall / (precision + recall)
-        if (precision + recall)
+        if precision + recall
         else 0.0
     )
 
-    latencies = sorted(
-        r["latency_seconds"]
-        for r in results
-        if r["latency_seconds"] is not None and r["success"]
+    clean_cases = [
+        r for r in results if not r["expected_risks"]
+    ]
+    clean_cases_with_alarm = sum(
+        bool(r["predicted_risks"]) for r in clean_cases
     )
 
-    if latencies:
-        mean_latency = sum(latencies) / len(latencies)
-        p95_index = max(0, int(0.95 * len(latencies) + 0.999999) - 1)
-        p95_latency = latencies[min(p95_index, len(latencies) - 1)]
-    else:
-        mean_latency = None
-        p95_latency = None
+    clean_cases_marked_safe = sum(
+        r["success"]
+        and not r["predicted_risks"]
+        and r["analysis"] is not None
+        and normalize_label(r["analysis"].get("verdict", "")) == "safe"
+        for r in clean_cases
+    )
 
-    # Clean cases = no risk expected.
-    clean_cases = [r for r in results if not r["expected_risks"]]
-    clean_with_alarm = [
-        r for r in clean_cases
-        if has_final_analysis(r) and r["predicted_risks"]
+    verdict_evaluable = [
+        r for r in results
+        if r["success"] and r["analysis"] is not None
     ]
-    clean_marked_safe = [
-        r for r in clean_cases if r["predicted_verdict"] == "safe"
-    ]
-
-    false_alarm_rate = (
-        len(clean_with_alarm) / len(clean_cases) if clean_cases else None
+    verdict_correct = sum(
+        r["verdict_correct"] for r in verdict_evaluable
     )
 
     severity_correct = sum(r["severity_correct"] for r in results)
     severity_total = sum(r["severity_total"] for r in results)
 
-    verdict_correct = sum(r["verdict_correct"] for r in results)
+    latencies = [r["latency_seconds"] for r in results]
 
     return {
         "model": RUN_MODEL,
         "total_cases": total,
-        "request_success_rate": successful / total,
-        "valid_json_rate": valid_json / total,
-        "valid_schema_rate_first_try": valid_schema / total,
+        "request_success_rate": safe_rate(successful, total),
+        "valid_json_rate": safe_rate(valid_json, total),
+        "valid_schema_rate_first_try": safe_rate(
+            valid_schema_first, total
+        ),
         "recovered_by_retry": recovered,
-        "valid_schema_rate_after_retry": (valid_schema + recovered) / total,
+        "valid_schema_rate_after_retry": safe_rate(successful, total),
         "precision": precision,
         "recall": recall,
         "f1": f1,
@@ -566,169 +340,154 @@ def calculate_summary(results):
         "fp": fp,
         "fn": fn,
         "clean_case_count": len(clean_cases),
-        "clean_cases_with_alarm": len(clean_with_alarm),
-        "false_alarm_rate": false_alarm_rate,
-        "clean_cases_marked_safe": len(clean_marked_safe),
-        "verdict_accuracy": verdict_correct / total,
-        "severity_accuracy": (
-            severity_correct / severity_total if severity_total else None
+        "clean_cases_with_alarm": clean_cases_with_alarm,
+        "false_alarm_rate": safe_rate(
+            clean_cases_with_alarm, len(clean_cases)
+        ),
+        "clean_cases_marked_safe": clean_cases_marked_safe,
+        "verdict_accuracy": safe_rate(
+            verdict_correct, len(verdict_evaluable)
+        ),
+        "severity_accuracy": safe_rate(
+            severity_correct, severity_total
         ),
         "severity_correct": severity_correct,
         "severity_total": severity_total,
-        "mean_latency_seconds": mean_latency,
-        "p95_latency_seconds": p95_latency,
-        "error_count": sum(bool(r["error"]) for r in results),
+        "mean_latency_seconds": (
+            sum(latencies) / len(latencies) if latencies else 0.0
+        ),
+        "p95_latency_seconds": percentile_95(latencies),
+        "error_count": sum(not r["success"] for r in results),
     }
 
 
-# --------------------------------------------------
-# Save results
-# --------------------------------------------------
+# =========================
+# Save result files
+# =========================
 
-
-def save_results(results, summary, timestamp):
-    """Writes the SAME files during one run (no pile-up of files)."""
-
-    prefix = f"{RUN_MODEL}_{timestamp}"
-
-    jsonl_path = OUTPUT_DIR / f"{prefix}_results.jsonl"
-    csv_path = OUTPUT_DIR / f"{prefix}_details.csv"
-    summary_path = OUTPUT_DIR / f"{prefix}_summary.json"
+def save_results(results, summary, run_timestamp):
+    jsonl_path = OUTPUT_DIR / f"benchmark_{run_timestamp}.jsonl"
+    csv_path = OUTPUT_DIR / f"benchmark_{run_timestamp}.csv"
+    summary_path = OUTPUT_DIR / f"summary_{run_timestamp}.json"
 
     with jsonl_path.open("w", encoding="utf-8") as file:
-        for row in results:
-            file.write(json.dumps(row, ensure_ascii=False) + "\n")
+        for result in results:
+            file.write(
+                json.dumps(result, ensure_ascii=False, default=str) + "\n"
+            )
 
-    csv_columns = [
-        "model",
-        "case_id",
-        "language",
-        "success",
-        "valid_json",
-        "valid_schema",
-        "recovered_by_retry",
-        "first_try_error",
-        "error",
-        "latency_seconds",
-        "expected_risks",
-        "predicted_risks",
-        "predicted_severities",
-        "expected_verdict",
-        "predicted_verdict",
-        "verdict_correct",
-        "tp",
-        "fp",
-        "fn",
-        "severity_correct",
-        "severity_total",
-    ]
+    # Keep nested fields readable in CSV by serializing them as JSON.
+    if results:
+        csv_rows = []
 
-    with csv_path.open("w", newline="", encoding="utf-8-sig") as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=csv_columns,
-            extrasaction="ignore",
-        )
-        writer.writeheader()
+        for result in results:
+            row = {}
+            for key, value in result.items():
+                if isinstance(value, (dict, list)):
+                    row[key] = json.dumps(value, ensure_ascii=False)
+                else:
+                    row[key] = value
+            csv_rows.append(row)
 
-        for row in results:
-            csv_row = dict(row)
-
-            for key in (
-                "expected_risks",
-                "predicted_risks",
-                "predicted_severities",
-            ):
-                csv_row[key] = json.dumps(
-                    csv_row[key],
-                    ensure_ascii=False,
-                )
-
-            writer.writerow(csv_row)
+        with csv_path.open(
+            "w", newline="", encoding="utf-8-sig"
+        ) as file:
+            writer = csv.DictWriter(
+                file, fieldnames=list(csv_rows[0].keys())
+            )
+            writer.writeheader()
+            writer.writerows(csv_rows)
+    else:
+        csv_path.write_text("", encoding="utf-8")
 
     with summary_path.open("w", encoding="utf-8") as file:
-        json.dump(summary, file, indent=4, ensure_ascii=False)
+        json.dump(summary, file, ensure_ascii=False, indent=2)
 
     return jsonl_path, csv_path, summary_path
 
 
-# --------------------------------------------------
+# =========================
 # Main
-# --------------------------------------------------
-
+# =========================
 
 def main():
-    if RUN_MODEL not in MODEL_CONFIG:
-        raise ValueError(
-            f"Invalid RUN_MODEL: {RUN_MODEL}. Choose one of {list(MODEL_CONFIG)}"
+    if not CASES_PATH.exists():
+        raise FileNotFoundError(
+            f"Benchmark dataset not found: {CASES_PATH}"
         )
 
-    cases = load_cases()
-    validate_all_cases(cases)
-    cases = select_cases(cases, sys.argv[1:])
+    with CASES_PATH.open("r", encoding="utf-8") as file:
+        cases = json.load(file)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if not isinstance(cases, list):
+        raise ValueError(
+            "benchmark_cases.json must contain a JSON list of cases."
+        )
+
+    # Optional case limit: python benchmark.py 2
+    if len(sys.argv) > 1:
+        try:
+            limit = int(sys.argv[1])
+            if limit < 1:
+                raise ValueError
+            cases = cases[:limit]
+        except ValueError:
+            raise ValueError(
+                "The optional argument must be a positive integer, "
+                "for example: python benchmark.py 2"
+            )
+
+    if not cases:
+        raise ValueError("No benchmark cases found.")
+
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results = []
 
     print(f"Model: {RUN_MODEL}")
-    print(f"Cases: {len(cases)}")
-    print(f"Cases file: {CASES_PATH}")
-
-    if RUN_MODEL != "Nemotron":
-        print(f"API URL: {get_generate_url()}")
-
+    print(f"Dataset: {CASES_PATH}")
+    print(f"Cases to run: {len(cases)}")
     print("-" * 50)
 
     for index, case in enumerate(cases, start=1):
-        case_id = get_case_id(case, index)
-        print(f"[{index}/{len(cases)}] Running {case_id}...")
+        case_id = case.get("id", index)
+        print(f"[{index}/{len(cases)}] Evaluating case {case_id}...")
 
-        result = evaluate_case(case, index)
+        result = evaluate_case(case)
         results.append(result)
 
-        print(
-            f"  Success={result['success']} | "
-            f"Schema={result['valid_schema']} | "
-            f"Retry={result['recovered_by_retry']} | "
-            f"Verdict={result['predicted_verdict'] or '-'} "
-            f"(expected {result['expected_verdict']}) | "
-            f"Latency={result['latency_seconds']}s | "
-            f"TP={result['tp']} FP={result['fp']} FN={result['fn']}"
-        )
-
-        if result["first_try_error"]:
-            print(f"  First try error: {result['first_try_error']}")
-
-        if result["error"]:
-            print(f"  Error: {result['error']}")
-
-        # Stop early if the first request cannot reach the model.
-        if index == 1 and not result["success"]:
-            print("\nFirst request failed. Fix the connection first, then run again.")
-            print("Check: server running? ngrok URL new? .env updated?")
-            save_results(results, calculate_summary(results), timestamp)
-            return
-
-        save_results(results, calculate_summary(results), timestamp)
+        if result["success"]:
+            print(
+                f"  Success | calls={result['generate_calls']} "
+                f"| latency={result['latency_seconds']}s"
+            )
+        else:
+            print(f"  Failed | {result['error']}")
 
     summary = calculate_summary(results)
+
     jsonl_path, csv_path, summary_path = save_results(
         results,
         summary,
-        timestamp,
+        run_timestamp,
     )
 
-    print("\n" + "=" * 50)
-    print("BENCHMARK SUMMARY")
-    print("=" * 50)
-
-    for key, value in summary.items():
-        print(f"{key}: {value}")
+    print("\nBenchmark summary:")
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
 
     print("\nSaved files:")
-    print(jsonl_path)
-    print(csv_path)
-    print(summary_path)
+    print(f"JSONL:   {jsonl_path}")
+    print(f"CSV:     {csv_path}")
+    print(f"Summary: {summary_path}")
+
+    # Log the completed benchmark and result files to MLflow.
+    log_benchmark_run(
+        summary=summary,
+        artifact_paths=[jsonl_path, csv_path, summary_path],
+        dataset_name=CASES_PATH.name,
+        prompt_version=PROMPT_VERSION,
+    )
+
+    print("Finished.")
 
 
 if __name__ == "__main__":

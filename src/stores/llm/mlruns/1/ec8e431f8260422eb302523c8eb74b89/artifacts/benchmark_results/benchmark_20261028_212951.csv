@@ -1,0 +1,13 @@
+﻿id,success,error,latency_seconds,generate_calls,valid_json,valid_schema_first_try,recovered_by_retry,expected_risks,predicted_risks,tp,fp,fn,verdict_correct,severity_correct,severity_total,analysis
+V4_EN01,False,"RuntimeError: HTTP 404 from https://cattail-recluse-parakeet.ngrok-free.dev/generate | Server said: <!DOCTYPE html>
+<html class=""h-full"" lang=""en-US"" dir=""ltr"">
+  <head>
+    <meta charset=""utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
+    <link rel=""preload"" href=""https://assets.ngrok.com/fonts/euclid-square/EuclidSquare-Regular-WebS.woff"" as=""font"" type=""font/wo",0.3206,1,False,False,False,[],[],0,0,0,False,0,0,
+V4_EN02,False,"RuntimeError: HTTP 404 from https://cattail-recluse-parakeet.ngrok-free.dev/generate | Server said: <!DOCTYPE html>
+<html class=""h-full"" lang=""en-US"" dir=""ltr"">
+  <head>
+    <meta charset=""utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
+    <link rel=""preload"" href=""https://assets.ngrok.com/fonts/euclid-square/EuclidSquare-Regular-WebS.woff"" as=""font"" type=""font/wo",0.2156,1,False,False,False,"[""unilateral_change""]",[],0,0,0,False,0,0,
