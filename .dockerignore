@@ -10,3 +10,7 @@ src/rag_test_samples
 src/try_*.py
 src/*_debug.txt
 **/__pycache__
+
+mlflow.db
+mlruns/
+benchmark_results/

@@ -16,29 +16,6 @@ from stores.llm import analyze_contract, summarize_contract
 from pipeline import split_clauses, gather_legal_chunks, build_legal_context
 
 
-def fake_generate_fn(prompt: str) -> str:
-    prompt_lower = prompt.lower()
-    if "json" in prompt_lower or "legal context" in prompt_lower:
-        mock_response = {
-            "contract_type": "other",
-            "summary": "This is a mock summary generated for API testing without connecting to a real LLM server.",
-            "risks": [
-                {
-                    "clause": "First test clause",
-                    "reason": "Contains unclear terms and conditions",
-                    "risk_type": "other",
-                    "severity": "low",
-                    "legal_reference": "Article (1) of Sample Law"
-                }
-            ],
-            "verdict": "risky",
-            "advice": "It is recommended to review the sample clauses carefully."
-        }
-        return json.dumps(mock_response, ensure_ascii=False)
-
-    return "This is a mock general summary returned by Fake LLM."
-
-
 class AnalyzeResponse(BaseModel):
     analysis: ContractAnalysis
     legal_context: List[RetrievedChunk]
@@ -112,7 +89,6 @@ def summarize(
         lambda: summarize_contract(
             contract_text=contract_text,
             language=language,
-            generate_fn=fake_generate_fn,
         )
     )
     return {"summary": summary}
@@ -137,7 +113,6 @@ def analyze(
             contract_text=contract_text,
             legal_context=legal_context_str,
             language=language,
-            generate_fn=fake_generate_fn,
         )
     )
 
