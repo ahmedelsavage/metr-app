@@ -7,6 +7,8 @@ services:
       - "8000:8000"
     volumes:
       - ./src/qdrant_storage:/app/src/qdrant_storage
+      - hf_cache:/root/.cache/huggingface
+      - paddle_cache:/root/.paddlex
     env_file:
       - ./src/.env
 
@@ -20,3 +22,7 @@ services:
       - api
     environment:
       - API_URL=http://api:8000
+
+volumes:
+  hf_cache:
+  paddle_cache:
