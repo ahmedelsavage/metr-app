@@ -1,4 +1,3 @@
-
 import csv
 import json
 import os
@@ -10,21 +9,12 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-try:
-    from .llm import (
-        analyze_contract,
-        build_risk_prompt,
-        generate_response,
-        parse_analysis_response,
-    )
-except ImportError:
-    from llm import (
-        analyze_contract,
-        build_risk_prompt,
-        generate_response,
-        parse_analysis_response,
-    )
-
+from stores.llm import (
+    analyze_contract,
+    build_risk_prompt,
+    generate_response,
+    parse_analysis_response,
+)
 
 # --------------------------------------------------
 # Configuration

@@ -1,29 +1,28 @@
-
 import os
 import re
 import time
-from pathlib import Path
 from typing import Callable, Optional
 
 import requests
 from dotenv import load_dotenv
 
-from prompts.ar import (
+from .prompts.ar import (
     RISK_DETECTION_PROMPT as AR_RISK_PROMPT,
 )
-from prompts.ar import (
+from .prompts.ar import (
     SUMMARY_PROMPT as AR_SUMMARY_PROMPT,
 )
-from prompts.en import (
+from .prompts.en import (
     RISK_DETECTION_PROMPT as EN_RISK_PROMPT,
 )
-from prompts.en import (
+from .prompts.en import (
     SUMMARY_PROMPT as EN_SUMMARY_PROMPT,
 )
 from schemas import ContractAnalysis
 
-load_dotenv(Path(__file__).resolve().parent / ".env")
+from config import ENV_FILE
 
+load_dotenv(ENV_FILE)
 
 # --------------------------------------------------
 # Settings: the final model is Qwen3-8B only

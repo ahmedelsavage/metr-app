@@ -3,9 +3,9 @@ import sys
 import time
 from pathlib import Path
 
-from llm import generate_response
+from stores.llm import generate_response
 from pipeline import analyze_contract_text
-from rag import RAG
+from stores.rag import RAG
 
 LIMIT_PER_CLAUSE = 2
 FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else "sample_contract.txt"
