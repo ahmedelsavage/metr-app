@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/qdrant_storage:/app/src/qdrant_storage
+      - hf_cache:/root/.cache/huggingface
+      - paddle_cache:/root/.paddlex
+    env_file:
+      - ./src/.env
+
+  ui:
+    build:
+      context: .
+      dockerfile: docker/ui.Dockerfile
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    environment:
+      - API_URL=http://api:8000
+
+volumes:
+  hf_cache:
+  paddle_cache:

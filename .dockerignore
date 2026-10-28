@@ -1,0 +1,12 @@
+.git
+ml
+data
+images
+reports
+src/.env
+src/benchmark_results
+src/reports
+src/rag_test_samples
+src/try_*.py
+src/*_debug.txt
+**/__pycache__

@@ -1,6 +1,8 @@
-# env activation
+# docker-compose
 
-$ source .venv/bin/activate
+```bash
+docker-compose up --build
+```
 
 # Data source
 
