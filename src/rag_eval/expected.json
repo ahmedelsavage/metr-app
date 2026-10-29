@@ -1,0 +1,656 @@
+[
+  {
+    "id": "c01_lease_unilateral",
+    "file": "c01_lease_unilateral.txt",
+    "topic": "lease",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "unilateral_change",
+      "unilateral_termination"
+    ],
+    "expected_severities": {
+      "unilateral_change": "high",
+      "unilateral_termination": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: العين المؤجرة",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 558
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: الأجرة",
+        "risk_type": "unilateral_change",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 147
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: إنهاء العقد",
+        "risk_type": "unilateral_termination",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 147
+          },
+          {
+            "law": "القانون المدني",
+            "article": 563
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: رد العين",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 591
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c02_lease_deposit_liability",
+    "file": "c02_lease_deposit_liability.txt",
+    "topic": "lease",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "unfair_deduction",
+      "liability_exclusion",
+      "unlimited_liability"
+    ],
+    "expected_severities": {
+      "unfair_deduction": "high",
+      "liability_exclusion": "high",
+      "unlimited_liability": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: العين المؤجرة",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 558
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: التأمين",
+        "risk_type": "unfair_deduction",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 591
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: العيوب",
+        "risk_type": "liability_exclusion",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 576
+          },
+          {
+            "law": "القانون المدني",
+            "article": 577
+          },
+          {
+            "law": "القانون المدني",
+            "article": 578
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: المسؤولية",
+        "risk_type": "unlimited_liability",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 591
+          },
+          {
+            "law": "القانون المدني",
+            "article": 223
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c03_lease_commercial_registration_arbitration",
+    "file": "c03_lease_commercial_registration_arbitration.txt",
+    "topic": "lease",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "other",
+      "unfair_arbitration"
+    ],
+    "expected_severities": {
+      "other": "high",
+      "unfair_arbitration": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: العين المؤجرة",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 558
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: التسجيل",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "قانون تنظيم الشهر العقاري",
+            "article": 11
+          },
+          {
+            "law": "القانون المدني",
+            "article": 604
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: الأجرة",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 586
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: حل النزاعات",
+        "risk_type": "unfair_arbitration",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 149
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c04_sale_used_car_dealer",
+    "file": "c04_sale_used_car_dealer.txt",
+    "topic": "sale",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "liability_exclusion",
+      "other"
+    ],
+    "expected_severities": {
+      "liability_exclusion": "high",
+      "other": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: المبيع",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 35
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: حالة السيارة",
+        "risk_type": "liability_exclusion",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 35
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          },
+          {
+            "law": "القانون المدني",
+            "article": 447
+          },
+          {
+            "law": "القانون المدني",
+            "article": 453
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: الاسترداد",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 17
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 21
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: التسليم",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 439
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c05_sale_land_unregistered",
+    "file": "c05_sale_land_unregistered.txt",
+    "topic": "sale",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "other"
+    ],
+    "expected_severities": {
+      "other": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: المبيع",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 466
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: الملكية",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "قانون تنظيم الشهر العقاري",
+            "article": 9
+          },
+          {
+            "law": "قانون تنظيم الشهر العقاري",
+            "article": 10
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: حق الاسترداد",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 465
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: التسليم",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 439
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c06_installment_appliance",
+    "file": "c06_installment_appliance.txt",
+    "topic": "installment_sale",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "unfair_deduction",
+      "liability_exclusion"
+    ],
+    "expected_severities": {
+      "unfair_deduction": "high",
+      "liability_exclusion": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: المبيع",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 30
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: التأخر في السداد",
+        "risk_type": "unfair_deduction",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 31
+          },
+          {
+            "law": "القانون المدني",
+            "article": 224
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: الضمان",
+        "risk_type": "liability_exclusion",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 22
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 20
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: فاتورة التقسيط",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c07_contractor_price_guarantee",
+    "file": "c07_contractor_price_guarantee.txt",
+    "topic": "contractor",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "unilateral_change",
+      "liability_exclusion"
+    ],
+    "expected_severities": {
+      "unilateral_change": "high",
+      "liability_exclusion": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: العمل",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 658
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: زيادة الأجر",
+        "risk_type": "unilateral_change",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 658
+          },
+          {
+            "law": "القانون المدني",
+            "article": 147
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: الضمان",
+        "risk_type": "liability_exclusion",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 651
+          },
+          {
+            "law": "القانون المدني",
+            "article": 653
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: مدة التنفيذ",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 657
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c08_agency_general_scope",
+    "file": "c08_agency_general_scope.txt",
+    "topic": "agency",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "other"
+    ],
+    "expected_severities": {
+      "other": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: الوكالة",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 701
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: التصرفات",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 701
+          },
+          {
+            "law": "القانون المدني",
+            "article": 702
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: حدود الوكالة",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 703
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: الأتعاب",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 701
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c09_online_phone_purchase",
+    "file": "c09_online_phone_purchase.txt",
+    "topic": "distance_contract",
+    "language": "ar",
+    "expected_verdict": "risky",
+    "expected_risks": [
+      "other",
+      "unfair_deduction"
+    ],
+    "expected_severities": {
+      "other": "high",
+      "unfair_deduction": "high"
+    },
+    "clauses": [
+      {
+        "clause": "البند الأول: المنتج",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 37
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: الرجوع في العقد",
+        "risk_type": "other",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 40
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 17
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: التسليم",
+        "risk_type": "unfair_deduction",
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 40
+          },
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 28
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: بيانات المشتري",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "قانون حماية المستهلك",
+            "article": 29
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c10_contractor_fair",
+    "file": "c10_contractor_fair.txt",
+    "topic": "contractor",
+    "language": "ar",
+    "expected_verdict": "safe",
+    "expected_risks": [],
+    "expected_severities": {},
+    "clauses": [
+      {
+        "clause": "البند الأول: العمل",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 658
+          }
+        ]
+      },
+      {
+        "clause": "البند الثاني: غرامة التأخير",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 223
+          },
+          {
+            "law": "القانون المدني",
+            "article": 224
+          }
+        ]
+      },
+      {
+        "clause": "البند الثالث: الضمان",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 651
+          }
+        ]
+      },
+      {
+        "clause": "البند الرابع: تعديل الأجر",
+        "risk_type": null,
+        "expected_articles": [
+          {
+            "law": "القانون المدني",
+            "article": 658
+          },
+          {
+            "law": "القانون المدني",
+            "article": 147
+          }
+        ]
+      }
+    ]
+  }
+]

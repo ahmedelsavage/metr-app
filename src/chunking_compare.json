@@ -1,0 +1,551 @@
+{
+  "summary": {
+    "article": {
+      "contracts": 10,
+      "llm_errors": 0,
+      "risky_clauses": 19,
+      "hit@1": 0.579,
+      "hit@3": 0.684,
+      "hit@5": 0.737,
+      "mrr": 0.645,
+      "verdict_accuracy": 0.9,
+      "precision": 0.706,
+      "recall": 0.706,
+      "f1": 0.706,
+      "avg_context_chars": 1358,
+      "avg_latency": 43.9
+    },
+    "fixed_chars": {
+      "contracts": 10,
+      "llm_errors": 0,
+      "risky_clauses": 19,
+      "hit@1": 0.158,
+      "hit@3": 0.368,
+      "hit@5": 0.474,
+      "mrr": 0.289,
+      "verdict_accuracy": 0.9,
+      "precision": 0.632,
+      "recall": 0.706,
+      "f1": 0.667,
+      "avg_context_chars": 2996,
+      "avg_latency": 54.0
+    },
+    "words": {
+      "contracts": 10,
+      "llm_errors": 0,
+      "risky_clauses": 19,
+      "hit@1": 0.211,
+      "hit@3": 0.474,
+      "hit@5": 0.474,
+      "mrr": 0.325,
+      "verdict_accuracy": 0.9,
+      "precision": 0.6,
+      "recall": 0.706,
+      "f1": 0.649,
+      "avg_context_chars": 2378,
+      "avg_latency": 54.4
+    }
+  },
+  "runs": {
+    "c01_lease_unilateral|article": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        2
+      ],
+      "context_chars": 1938,
+      "predicted_risks": [
+        "unilateral_change",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 43.9,
+      "id": "c01_lease_unilateral",
+      "strategy": "article"
+    },
+    "c01_lease_unilateral|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        2
+      ],
+      "context_chars": 3003,
+      "predicted_risks": [
+        "unilateral_change",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 53.0,
+      "id": "c01_lease_unilateral",
+      "strategy": "fixed_chars"
+    },
+    "c01_lease_unilateral|words": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        2
+      ],
+      "context_chars": 2406,
+      "predicted_risks": [
+        "unilateral_change",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 55.4,
+      "id": "c01_lease_unilateral",
+      "strategy": "words"
+    },
+    "c02_lease_deposit_liability|article": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        1,
+        null
+      ],
+      "context_chars": 1266,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 46.6,
+      "id": "c02_lease_deposit_liability",
+      "strategy": "article"
+    },
+    "c02_lease_deposit_liability|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        2,
+        4
+      ],
+      "context_chars": 3003,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unfair_deduction",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 72.3,
+      "id": "c02_lease_deposit_liability",
+      "strategy": "fixed_chars"
+    },
+    "c02_lease_deposit_liability|words": {
+      "clauses_found": 4,
+      "ranks": [
+        3,
+        1,
+        null
+      ],
+      "context_chars": 1564,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unfair_deduction",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 58.3,
+      "id": "c02_lease_deposit_liability",
+      "strategy": "words"
+    },
+    "c03_lease_commercial_registration_arbitration|article": {
+      "clauses_found": 4,
+      "ranks": [
+        2,
+        null
+      ],
+      "context_chars": 1072,
+      "predicted_risks": [
+        "unfair_arbitration",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 47.4,
+      "id": "c03_lease_commercial_registration_arbitration",
+      "strategy": "article"
+    },
+    "c03_lease_commercial_registration_arbitration|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        null
+      ],
+      "context_chars": 4005,
+      "predicted_risks": [
+        "unfair_arbitration"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 39.9,
+      "id": "c03_lease_commercial_registration_arbitration",
+      "strategy": "fixed_chars"
+    },
+    "c03_lease_commercial_registration_arbitration|words": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        null
+      ],
+      "context_chars": 2424,
+      "predicted_risks": [
+        "unfair_arbitration",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 51.2,
+      "id": "c03_lease_commercial_registration_arbitration",
+      "strategy": "words"
+    },
+    "c04_sale_used_car_dealer|article": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        1
+      ],
+      "context_chars": 1691,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 55.7,
+      "id": "c04_sale_used_car_dealer",
+      "strategy": "article"
+    },
+    "c04_sale_used_car_dealer|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        null
+      ],
+      "context_chars": 4005,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 65.7,
+      "id": "c04_sale_used_car_dealer",
+      "strategy": "fixed_chars"
+    },
+    "c04_sale_used_car_dealer|words": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        null
+      ],
+      "context_chars": 3284,
+      "predicted_risks": [
+        "other"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 57.6,
+      "id": "c04_sale_used_car_dealer",
+      "strategy": "words"
+    },
+    "c05_sale_land_unregistered|article": {
+      "clauses_found": 4,
+      "ranks": [
+        4,
+        1
+      ],
+      "context_chars": 755,
+      "predicted_risks": [
+        "other"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 40.3,
+      "id": "c05_sale_land_unregistered",
+      "strategy": "article"
+    },
+    "c05_sale_land_unregistered|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        4,
+        null
+      ],
+      "context_chars": 3003,
+      "predicted_risks": [
+        "unfair_deduction",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 50.8,
+      "id": "c05_sale_land_unregistered",
+      "strategy": "fixed_chars"
+    },
+    "c05_sale_land_unregistered|words": {
+      "clauses_found": 4,
+      "ranks": [
+        2,
+        null
+      ],
+      "context_chars": 3367,
+      "predicted_risks": [
+        "unilateral_termination",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 51.2,
+      "id": "c05_sale_land_unregistered",
+      "strategy": "words"
+    },
+    "c06_installment_appliance|article": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        null
+      ],
+      "context_chars": 1233,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unfair_deduction"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 41.0,
+      "id": "c06_installment_appliance",
+      "strategy": "article"
+    },
+    "c06_installment_appliance|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        null
+      ],
+      "context_chars": 2002,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unfair_deduction"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 40.7,
+      "id": "c06_installment_appliance",
+      "strategy": "fixed_chars"
+    },
+    "c06_installment_appliance|words": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        null
+      ],
+      "context_chars": 1787,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unfair_deduction"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 43.0,
+      "id": "c06_installment_appliance",
+      "strategy": "words"
+    },
+    "c07_contractor_price_guarantee|article": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        1
+      ],
+      "context_chars": 876,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unilateral_change"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 40.0,
+      "id": "c07_contractor_price_guarantee",
+      "strategy": "article"
+    },
+    "c07_contractor_price_guarantee|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        null,
+        null
+      ],
+      "context_chars": 3003,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unilateral_change"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 62.6,
+      "id": "c07_contractor_price_guarantee",
+      "strategy": "fixed_chars"
+    },
+    "c07_contractor_price_guarantee|words": {
+      "clauses_found": 4,
+      "ranks": [
+        3,
+        null
+      ],
+      "context_chars": 2442,
+      "predicted_risks": [
+        "liability_exclusion",
+        "unilateral_change"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 57.4,
+      "id": "c07_contractor_price_guarantee",
+      "strategy": "words"
+    },
+    "c08_agency_general_scope|article": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        1
+      ],
+      "context_chars": 1355,
+      "predicted_risks": [
+        "unfair_arbitration",
+        "unilateral_change"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 46.1,
+      "id": "c08_agency_general_scope",
+      "strategy": "article"
+    },
+    "c08_agency_general_scope|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        2
+      ],
+      "context_chars": 1931,
+      "predicted_risks": [
+        "unilateral_termination",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 52.4,
+      "id": "c08_agency_general_scope",
+      "strategy": "fixed_chars"
+    },
+    "c08_agency_general_scope|words": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        null
+      ],
+      "context_chars": 1421,
+      "predicted_risks": [
+        "unfair_arbitration",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 64.3,
+      "id": "c08_agency_general_scope",
+      "strategy": "words"
+    },
+    "c09_online_phone_purchase|article": {
+      "clauses_found": 4,
+      "ranks": [
+        1,
+        1
+      ],
+      "context_chars": 2518,
+      "predicted_risks": [
+        "unfair_deduction"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 52.8,
+      "id": "c09_online_phone_purchase",
+      "strategy": "article"
+    },
+    "c09_online_phone_purchase|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [
+        2,
+        1
+      ],
+      "context_chars": 4005,
+      "predicted_risks": [
+        "unfair_deduction",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 70.1,
+      "id": "c09_online_phone_purchase",
+      "strategy": "fixed_chars"
+    },
+    "c09_online_phone_purchase|words": {
+      "clauses_found": 4,
+      "ranks": [
+        2,
+        1
+      ],
+      "context_chars": 3541,
+      "predicted_risks": [
+        "unfair_deduction",
+        "unilateral_termination"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 59.7,
+      "id": "c09_online_phone_purchase",
+      "strategy": "words"
+    },
+    "c10_contractor_fair|article": {
+      "clauses_found": 4,
+      "ranks": [],
+      "context_chars": 876,
+      "predicted_risks": [
+        "other"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 24.9,
+      "id": "c10_contractor_fair",
+      "strategy": "article"
+    },
+    "c10_contractor_fair|fixed_chars": {
+      "clauses_found": 4,
+      "ranks": [],
+      "context_chars": 2001,
+      "predicted_risks": [
+        "other"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 32.7,
+      "id": "c10_contractor_fair",
+      "strategy": "fixed_chars"
+    },
+    "c10_contractor_fair|words": {
+      "clauses_found": 4,
+      "ranks": [],
+      "context_chars": 1541,
+      "predicted_risks": [
+        "unilateral_change",
+        "unlimited_liability"
+      ],
+      "verdict": "risky",
+      "error": null,
+      "latency": 46.3,
+      "id": "c10_contractor_fair",
+      "strategy": "words"
+    }
+  }
+}
