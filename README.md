@@ -117,6 +117,6 @@ Connect with us on LinkedIn:
 
 - [Ahmed Mohamed](https://www.linkedin.com/in/ahmedelsavage)
 - [Abdelrahman Mokhtar](https://www.linkedin.com/in/amokhtar51)
-- [Toka Abdelaziz](https://www.linkedin.com/in/toka-abdelaziz-80a004306/)
-- [Mohamed Tamer](https://www.linkedin.com/in/mohamed-tamer-562921231/)
-- Asharf Mohamed
+- [Toka Abdelaziz](https://www.linkedin.com/in/toka-abdelaziz-80a004306)
+- [Mohamed Tamer](https://www.linkedin.com/in/mohamed-tamer-562921231)
+- [Ashraf Mohamed](https://www.linkedin.com/in/ashraf-mohammed-a0736a32a)
