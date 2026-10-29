@@ -50,8 +50,8 @@ docker-compose up --build
 
 | Service | Address |
 |---|---|
-| Web UI | http://localhost:8501 |
-| API docs | http://localhost:8000/docs |
+| Streamlit UI | http://localhost:8501 |
+| API docs (FastAPI) | http://localhost:8000/docs |
 
 To change the LLM server later, edit the two variables and run `docker-compose up -d --force-recreate api`.
 
@@ -74,6 +74,8 @@ src/
   config.py      Settings from .env
   schemas.py     Typed models
   benchmark.py   LLM evaluation
+  compare_chunking.py   RAG chunking evaluation
+  rag_eval/      Test contracts and expected answers
   stores/
     ocr/  rag/  llm/
 docker/
@@ -87,6 +89,31 @@ ml/              Research notebooks
 - **Validated output:** every LLM answer is checked against a schema and retried if invalid.
 - **Measured:** `benchmark.py` scores the LLM on labeled cases and logs results to MLflow.
 - **Containerized:** one command starts everything, and model downloads are cached.
+
+## RAG evaluation
+
+We compared three ways of splitting the law texts into chunks: by article, by fixed characters, and by words. Same knowledge base, same embedding model, same LLM (Qwen3-8B).
+
+**Test set:** 10 contracts, 40 clauses, 19 of them risky. Each contract has expected risks and expected law articles in `src/rag_eval/expected.json`.
+
+| Metric | article | fixed_chars | words |
+|---|---|---|---|
+| Correct article is the first result (hit@1) | **57.9%** | 15.8% | 21.1% |
+| Correct article in top 3 (hit@3) | **68.4%** | 36.8% | 47.4% |
+| Correct article in top 5 (hit@5) | **73.7%** | 47.4% | 47.4% |
+| MRR | **0.645** | 0.289 | 0.325 |
+| Risk F1 | **70.6%** | 66.7% | 64.9% |
+| Avg context sent to LLM (chars) | **1,358** | 2,996 | 2,378 |
+
+Splitting by article works best: one article is one complete legal idea, and the LLM receives a smaller, cleaner context.
+
+Run it from `src` (stop Docker first, Qdrant allows one process):
+
+```bash
+python compare_chunking.py
+```
+
+Results are saved to `src/chunking_compare.json`.
 
 ## Research (ML and BERT)
 
