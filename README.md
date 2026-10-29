@@ -80,6 +80,8 @@ src/
     ocr/  rag/  llm/
 docker/
 ml/              Research notebooks
+  notebooks/
+    llm-server.ipynb   Kaggle deployment notebook for Qwen3-8B model server
 ```
 
 ## Scalable and maintainable
